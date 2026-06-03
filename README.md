@@ -84,21 +84,33 @@ Você tem 37 comandos que cobrem o ciclo completo do AI-SDLC — desde captura d
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/HideakiSolutions/second-brain-premium.git ~/second-brain-premium
-
-# 2. Entre no diretório
 cd ~/second-brain-premium
 
-# 3. (Opcional) Suba o stack semântico Qdrant + Ollama
-docker compose -f _bootstrap/agentic/docker-compose.yml up -d
-docker exec sb-ollama ollama pull bge-m3
-
-# 4. Rode os testes para validar o setup
-bash tests/run-all.sh
+# 2. Rode o installer interativo (recomendado)
+./install.sh
 ```
 
-Nenhum installer global. O scaffold é auto-contido — você opera dentro do diretório do repositório.
+O installer é **agnóstico** (zero paths hardcoded) e **idempotente** (pode rodar várias vezes). Pergunta cada destino, faz backup de qualquer arquivo externo antes de modificar, e nunca usa `sudo`. Componentes que cobre:
 
-Para personalizar (preencher identidade, criar primeiro projeto): siga [`guia-personalizacao.md`](guia-personalizacao.md).
+| # | Componente | Descrição |
+|---|---|---|
+| 1 | Slash commands | Symlink/copy de `.claude/commands/*.md` → seu `~/.claude/commands/` |
+| 2 | Skills Codex | Symlink/copy de `.codex/skills/sb-*/` → seu `~/.codex/skills/` |
+| 3 | Hooks | Merge idempotente de `.claude/settings.json` com backup `.bak.<timestamp>` |
+| 4 | CLAUDE.md global | Append (ou atualiza) bloco "Second Brain" no `~/.claude/CLAUDE.md` global |
+| 5 | Crons | Mostra linhas para você colar manualmente (nunca modifica crontab) |
+| 6 | Stack semântico | Mostra comandos para subir Qdrant + Ollama (não sobe automaticamente) |
+
+Cada componente é opt-in (`Y/N` interativo). Flags: `--yes` (não-interativo), `--dry-run`, `--minimal` (só commands), `--uninstall`, `--debug`, `--help`.
+
+```bash
+# Alternativa manual (sem installer)
+docker compose -f _bootstrap/agentic/docker-compose.yml up -d   # opcional
+docker exec sb-ollama ollama pull bge-m3                          # opcional
+bash tests/run-all.sh                                              # validação
+```
+
+Para personalizar (preencher identidade, criar primeiro projeto) após o install: siga [`guia-personalizacao.md`](guia-personalizacao.md).
 
 ---
 
@@ -610,10 +622,15 @@ A premium, enterprise-grade second-brain scaffold derived from the open-source [
 ```bash
 git clone https://github.com/HideakiSolutions/second-brain-premium.git
 cd second-brain-premium
+./install.sh                  # interactive installer (recommended)
+
+# Or manual:
 docker compose -f _bootstrap/agentic/docker-compose.yml up -d   # optional semantic stack
 docker exec sb-ollama ollama pull bge-m3                          # optional
 bash tests/run-all.sh
 ```
+
+The installer is **agnostic** (zero hardcoded paths) and **idempotent** (re-run safely). It asks for each destination, backs up any external file before modifying, never uses `sudo`. Flags: `--yes`, `--dry-run`, `--minimal`, `--uninstall`, `--debug`, `--help`.
 
 ### Quick start
 
