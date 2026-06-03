@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Session Handoff"
+  short_description: "Você é o gerador de handoff do segundo cérebro. Crie um artef"
+  default_prompt: "Use $sb-session-handoff with the current task input."

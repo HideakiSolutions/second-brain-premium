@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Live Deploy Validate"
+  short_description: "Valida deploy live em GitOps, cluster e URL"
+  default_prompt: "Use $sb-live-deploy-validate with the target app or URL."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Context Engineering"
+  short_description: "Você é o engenheiro de contexto do segundo cérebro. Estruture"
+  default_prompt: "Use $sb-context-engineering with the current task input."

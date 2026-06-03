@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Consolidate Prompts"
+  short_description: "Você é o analisador de padrões de uso do segundo cérebro. Le"
+  default_prompt: "Use $sb-consolidate-prompts with the current task input."

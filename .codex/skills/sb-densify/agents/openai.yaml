@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Densify"
+  short_description: "Roda auto-linker, concept-extractor e pattern-matrix-generator e"
+  default_prompt: "Use $sb-densify with the current task input."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Focus"
+  short_description: "Você é o carregador de contexto cirúrgico do segundo cérebro"
+  default_prompt: "Use $sb-focus with the current task input."

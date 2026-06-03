@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Content Idea"
+  short_description: "Você é o gerador de ideias de conteúdo técnico do segundo c�"
+  default_prompt: "Use $sb-content-idea with the current task input."

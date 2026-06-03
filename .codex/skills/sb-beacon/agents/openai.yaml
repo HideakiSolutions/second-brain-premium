@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Beacon"
+  short_description: "Farol read-only project-scoped para escolher a proxima acao."
+  default_prompt: "Use $sb-beacon with the current task input."

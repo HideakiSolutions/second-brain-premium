@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain End Session"
+  short_description: "Você é o fechador de sessão do segundo cérebro. Consolide o "
+  default_prompt: "Use $sb-end-session with the current task input."

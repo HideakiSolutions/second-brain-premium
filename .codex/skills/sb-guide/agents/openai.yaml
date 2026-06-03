@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Sb Guide"
+  short_description: "Carrega o mapa autoritativo do second-brain (skill second-brain-"
+  default_prompt: "Use $sb-sb-guide with the current task input."

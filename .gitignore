@@ -1,0 +1,42 @@
+# Obsidian (configurações locais por máquina)
+.obsidian/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*~
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# Session state (ephemeral, never committed)
+HANDOFF.md
+SESSION-CHECKPOINT.md
+
+# Memory transient state (flags + logs; reconstruídos por hooks)
+_memory/.needs-end-session
+_memory/.compacted-without-end-session
+_memory/.consolidation-ready
+_memory/.prompt-log.txt
+_memory/.prompt-log-stats.txt
+_memory/.pre-compact-notes.md
+
+# Cron / install logs
+.logs/
+
+# Bootstrap/install local state
+.second-brain/
+
+# Event broker (Fase B): eventos transient ao processamento
+_memory/.events/in/
+_memory/.events/dlq/
+_memory/.events/dedup.db
+_memory/.events/dedup.db-journal
+.claude/scheduled_tasks.lock

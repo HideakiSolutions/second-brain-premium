@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Rfc"
+  short_description: "Gere um RFC (Request for Comments) ou design doc para uma decis√"
+  default_prompt: "Use $sb-rfc with the current task input."

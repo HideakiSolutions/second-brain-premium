@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Post Draft"
+  short_description: "Você é o curador e redator de postagens do segundo cérebro. V"
+  default_prompt: "Use $sb-post-draft with the current task input."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Curate Vault"
+  short_description: "Revisão interativa de propostas de curação do vault"
+  default_prompt: "Use $sb-curate-vault with the current task input."

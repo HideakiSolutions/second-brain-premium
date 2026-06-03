@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Braindump"
+  short_description: "Processe meu braindump e organize no vault."
+  default_prompt: "Use $sb-braindump with the current task input."

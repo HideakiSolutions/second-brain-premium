@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Tag Audit"
+  short_description: "Audita frontmatter contra TAG-TAXONOMY.md, lista violações, su"
+  default_prompt: "Use $sb-tag-audit with the current task input."

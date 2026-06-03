@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Sb Search"
+  short_description: "Busca semântica sobre todo o vault (Qdrant + bge-m3 local). Ret"
+  default_prompt: "Use $sb-sb-search with the current task input."

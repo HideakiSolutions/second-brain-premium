@@ -1,0 +1,24 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = [
+  "_bootstrap/agentic/data",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I", "UP"]
+ignore = [
+  "E501",  # line-too-long (line-length already set permissively)
+  "B008",  # function call in default argument (used by argparse patterns)
+  "E402",  # module-level import not at top — usado após sys.path.insert para sibling imports
+  "F401",  # unused import — usado em padrões try/except para optional deps (httpx)
+]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+strict_optional = false
+files = ["_bootstrap/agentic", ".claude/scripts/lib"]
+exclude = [
+  "_bootstrap/agentic/data",
+]

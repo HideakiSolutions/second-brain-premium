@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# post-merge — emite evento de merge.
+set -e
+VAULT_EVENTS_IN="/opt/hideakisolutions/second-brain/_memory/.events/in"
+[ -d "$VAULT_EVENTS_IN" ] || exit 0
+
+REPO_PATH="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+[ -z "$REPO_PATH" ] && exit 0
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+SHA="$(git rev-parse HEAD)"
+TIMESTAMP="$(date -Iseconds)"
+
+EVENT_FILE="$VAULT_EVENTS_IN/post-merge-${SHA:0:12}.jsonl"
+cat > "$EVENT_FILE" <<EOF
+{"type":"merge","timestamp":"$TIMESTAMP","sha":"$SHA","branch":"$BRANCH","repo_path":"$REPO_PATH"}
+EOF
+exit 0

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Pipeline"
+  short_description: "Mostre o dashboard de projetos e tasks com visão completa e aci"
+  default_prompt: "Use $sb-pipeline with the current task input."

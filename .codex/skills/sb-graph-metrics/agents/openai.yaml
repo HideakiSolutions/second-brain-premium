@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Graph Metrics"
+  short_description: "Gera relatório de saúde do grafo (ilhas, hubs, broken links, t"
+  default_prompt: "Use $sb-graph-metrics with the current task input."

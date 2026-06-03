@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Ingest"
+  short_description: "Você é o ingestor de fontes externas do segundo cérebro. Capt"
+  default_prompt: "Use $sb-ingest with the current task input."

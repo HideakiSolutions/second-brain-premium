@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Review Captures"
+  short_description: "Revisa e aprova eventos auto-capturados em _pipeline/inbox/. Pro"
+  default_prompt: "Use $sb-review-captures with the current task input."

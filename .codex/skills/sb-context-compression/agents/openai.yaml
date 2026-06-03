@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Context Compression"
+  short_description: "Você é o compressor de contexto do segundo cérebro. Reduza o "
+  default_prompt: "Use $sb-context-compression with the current task input."

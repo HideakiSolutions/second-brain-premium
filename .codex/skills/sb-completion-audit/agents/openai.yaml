@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Completion Audit"
+  short_description: "Audita completude de entregas com evidencias e gaps"
+  default_prompt: "Use $sb-completion-audit with the current delivery scope."

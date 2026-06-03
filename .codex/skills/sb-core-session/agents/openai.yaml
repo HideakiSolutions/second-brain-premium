@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Core Session"
+  short_description: "Você é o analisador de core do segundo cérebro. Cruze o conhe"
+  default_prompt: "Use $sb-core-session with the current task input."

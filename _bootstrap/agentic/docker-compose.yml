@@ -1,0 +1,41 @@
+name: secondbrain-agentic
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: sb-qdrant
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333"   # REST API (único acesso necessário)
+      - "127.0.0.1:6334:6334"   # gRPC
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sb-ollama
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ./data/ollama:/root/.ollama
+    # Embeddings via CPU são suficientes para 374 docs do vault.
+    # Se houver GPU NVIDIA, descomentar:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+

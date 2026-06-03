@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# post-commit — emite evento JSONL para o vault second-brain.
+#
+# Instalação: copiar para ~/.config/git/hooks-shared/post-commit OU
+#             configurar git config core.hooksPath para apontar aqui.
+#
+# Sobrevive a vault inacessível (timeout curto, sem rede). Latência <50ms.
+
+set -e
+
+VAULT_EVENTS_IN="/opt/hideakisolutions/second-brain/_memory/.events/in"
+[ -d "$VAULT_EVENTS_IN" ] || exit 0
+
+REPO_PATH="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+[ -z "$REPO_PATH" ] && exit 0
+
+SHA="$(git rev-parse HEAD)"
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+AUTHOR="$(git log -1 --pretty=%an)"
+MESSAGE_BODY="$(git log -1 --pretty=%B | head -1)"
+FILES_CHANGED="$(git diff-tree --no-commit-id --name-only -r HEAD | head -20 | tr '\n' ',' | sed 's/,$//')"
+TIMESTAMP="$(date -Iseconds)"
+
+# Escapar para JSON (somente aspas duplas e backslashes)
+escape() {
+  printf '%s' "$1" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read())[1:-1])' 2>/dev/null \
+    || printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+EVENT_FILE="$VAULT_EVENTS_IN/post-commit-${SHA:0:12}.jsonl"
+
+cat > "$EVENT_FILE" <<EOF
+{"type":"commit","timestamp":"$TIMESTAMP","sha":"$SHA","branch":"$BRANCH","author":"$(escape "$AUTHOR")","message":"$(escape "$MESSAGE_BODY")","files":"$(escape "$FILES_CHANGED")","repo_path":"$REPO_PATH"}
+EOF
+
+exit 0

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Article Draft"
+  short_description: "Você é o curador e redator de artigos do segundo cérebro. Val"
+  default_prompt: "Use $sb-article-draft with the current task input."

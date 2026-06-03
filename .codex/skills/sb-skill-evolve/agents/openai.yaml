@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Skill Evolve"
+  short_description: "Planeja evolucao assistida de skills e hooks"
+  default_prompt: "Use $sb-skill-evolve with current learn-loop candidates."

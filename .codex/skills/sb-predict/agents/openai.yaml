@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Predict"
+  short_description: "Você é o preditor de próximas tarefas do segundo cérebro. Co"
+  default_prompt: "Use $sb-predict with the current task input."

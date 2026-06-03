@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Justify"
+  short_description: "Recebe um trecho de proposta/decisão e classifica precedentes d"
+  default_prompt: "Use $sb-justify with the current task input."

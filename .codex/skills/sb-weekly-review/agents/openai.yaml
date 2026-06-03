@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Weekly Review"
+  short_description: "Você é o revisor semanal do segundo cérebro. Analise a semana"
+  default_prompt: "Use $sb-weekly-review with the current task input."

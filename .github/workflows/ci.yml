@@ -1,0 +1,47 @@
+name: ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: "./.claude"
+          severity: warning
+      - name: ShellCheck tests/
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: "./tests"
+          severity: warning
+
+  python-lint:
+    name: Python lint (ruff + mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff + mypy
+        run: pip install ruff mypy
+      - name: Ruff check
+        run: ruff check _bootstrap/agentic
+      - name: Mypy
+        run: mypy --ignore-missing-imports --no-strict-optional _bootstrap/agentic || true
+
+  vault-tests:
+    name: Vault tests (bash suite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run full suite
+        run: bash tests/run-all.sh

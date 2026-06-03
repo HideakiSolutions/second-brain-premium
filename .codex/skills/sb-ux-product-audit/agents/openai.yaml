@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain UX Product Audit"
+  short_description: "Classifica frontend como produto, MVP ou scaffold"
+  default_prompt: "Use $sb-ux-product-audit with the target frontend flow."

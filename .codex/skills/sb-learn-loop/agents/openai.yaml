@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Learn Loop"
+  short_description: "Você é o analisador de aprendizado operacional do second-brain"
+  default_prompt: "Use $sb-learn-loop with the current task input."

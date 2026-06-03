@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Ask"
+  short_description: "Pergunte qualquer coisa ao second brain. Resposta sintetizada vi"
+  default_prompt: "Use $sb-ask with the current task input."

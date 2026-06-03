@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Delivery Closeout"
+  short_description: "Fecha entregas com validacao, git e registro assistido"
+  default_prompt: "Use $sb-delivery-closeout with the current delivery."

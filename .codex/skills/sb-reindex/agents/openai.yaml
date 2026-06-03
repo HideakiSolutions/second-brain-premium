@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Sb Reindex"
+  short_description: "Re-indexa o vault no Qdrant via embeddings bge-m3. Idempotente. "
+  default_prompt: "Use $sb-sb-reindex with the current task input."

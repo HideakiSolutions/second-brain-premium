@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Daily Briefing"
+  short_description: "Você é o segundo cérebro operacional. Gere o briefing diário"
+  default_prompt: "Use $sb-daily-briefing with the current task input."

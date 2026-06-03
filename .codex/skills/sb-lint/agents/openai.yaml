@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Lint"
+  short_description: "Você é o auditor do knowledge graph. Verifique a saúde do vau"
+  default_prompt: "Use $sb-lint with the current task input."
