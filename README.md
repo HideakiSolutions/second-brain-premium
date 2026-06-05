@@ -67,7 +67,7 @@ Você tem 37 comandos que cobrem o ciclo completo do AI-SDLC — desde captura d
 ### Opcional (mas recomendado)
 
 4. **Python 3.11+** — necessário para subsistemas `curator/`, `predictor/`, `style/profiler.py` e para o hook `secret-guard`.
-5. **Docker** — para subir o stack semântico (Qdrant + Ollama). Sem Docker, todos os comandos que dependem do stack degradam para fallback determinístico (grep + Read).
+5. **Docker** *ou* binários nativos — para o stack semântico (Qdrant + Ollama). O `stack.sh` suporta os dois modos; sem o stack, todos os comandos que dependem dele degradam para fallback determinístico (grep + Read).
 6. **`gh` CLI** — se quiser usar comandos que tocam GitHub (PRs, issues).
 7. **crontab** — Linux/macOS/WSL. Para os 3 crons opcionais (daily-heartbeat, weekly-vault-lint, weekly-core-session).
 
@@ -99,14 +99,13 @@ O installer é **agnóstico** (zero paths hardcoded) e **idempotente** (pode rod
 | 3 | Hooks | Merge idempotente de `.claude/settings.json` com backup `.bak.<timestamp>` |
 | 4 | CLAUDE.md global | Append (ou atualiza) bloco "Second Brain" no `~/.claude/CLAUDE.md` global |
 | 5 | Crons | Mostra linhas para você colar manualmente (nunca modifica crontab) |
-| 6 | Stack semântico | Mostra comandos para subir Qdrant + Ollama (não sobe automaticamente) |
+| 6 | Stack semântico | Pergunta o modo (docker/nativo) e GPU, grava `stack.env` e oferece rodar o setup |
 
 Cada componente é opt-in (`Y/N` interativo). Flags: `--yes` (não-interativo), `--dry-run`, `--minimal` (só commands), `--uninstall`, `--debug`, `--help`.
 
 ```bash
 # Alternativa manual (sem installer)
-docker compose -f _bootstrap/agentic/docker-compose.yml up -d   # opcional
-docker exec sb-ollama ollama pull bge-m3                          # opcional
+bash _bootstrap/agentic/stack.sh setup                             # opcional (docker ou nativo)
 bash tests/run-all.sh                                              # validação
 ```
 
@@ -131,8 +130,7 @@ Edite cada arquivo dentro (`modules.md`, `integrations.md`, `gotchas.md`, `decis
 ### Min 10-15 — (Opcional) Subir o stack semântico
 
 ```bash
-docker compose -f _bootstrap/agentic/docker-compose.yml up -d
-docker exec sb-ollama ollama pull bge-m3
+bash _bootstrap/agentic/stack.sh setup
 bash .claude/scripts/sb-reindex.sh
 ```
 
@@ -310,11 +308,10 @@ Os 37 comandos têm **port equivalente em Codex** em `.codex/skills/sb-<comando>
 
 ## Stack semântico opcional (Qdrant + Ollama)
 
-**TL;DR**: 3 comandos sobem o stack; `/ask`, `/search`, `/justify`, `/densify`, `/learn-loop` ganham qualidade semântica.
+**TL;DR**: 2 comandos sobem o stack (docker ou nativo, conforme `stack.env`); `/ask`, `/search`, `/justify`, `/densify`, `/learn-loop` ganham qualidade semântica.
 
 ```bash
-docker compose -f _bootstrap/agentic/docker-compose.yml up -d
-docker exec sb-ollama ollama pull bge-m3
+bash _bootstrap/agentic/stack.sh setup
 bash .claude/scripts/sb-reindex.sh
 ```
 
@@ -467,7 +464,9 @@ _knowledge/
 
 _bootstrap/
   agentic/                         <- stack Qdrant + Ollama (opcional)
-    docker-compose.yml             <- sobe Qdrant + Ollama
+    stack.sh                       <- setup/start/stop/status (modo docker ou nativo)
+    docker-compose.yml             <- containers (modo docker)
+    docker-compose.gpu.yml         <- override GPU NVIDIA (SB_STACK_GPU=on)
     README.md                      <- por que e como usar
     indexer/, eval/, curator/, predictor/, style/   <- subsistemas Python
   templates/                       <- templates de projeto/decision/state
@@ -572,10 +571,14 @@ Confirme entradas em `.claude/settings.json`. Reinicie sessão Claude Code. Gara
 ### Stack Qdrant/Ollama não sobe
 
 ```bash
+bash _bootstrap/agentic/stack.sh status
+# modo docker:
 docker compose -f _bootstrap/agentic/docker-compose.yml logs
+# modo nativo:
+cat _bootstrap/agentic/native/run/*.log
 ```
 
-Causas comuns: porta 6333/11434 já em uso, Docker daemon parado, espaço em disco insuficiente.
+Causas comuns: porta 6333/11434 já em uso, Docker daemon parado (modo docker), espaço em disco insuficiente.
 
 ### Test `secret-guard` ou `assisted-hooks` falham
 
@@ -625,8 +628,7 @@ cd second-brain-premium
 ./install.sh                  # interactive installer (recommended)
 
 # Or manual:
-docker compose -f _bootstrap/agentic/docker-compose.yml up -d   # optional semantic stack
-docker exec sb-ollama ollama pull bge-m3                          # optional
+bash _bootstrap/agentic/stack.sh setup                             # optional semantic stack (docker or native)
 bash tests/run-all.sh
 ```
 

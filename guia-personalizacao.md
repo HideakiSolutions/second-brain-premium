@@ -37,11 +37,10 @@ Na **Seção 4 — Guardrails**, revise se há alguma regra que você quer mudar
 
 Esta etapa é **opcional**. O vault funciona sem ela; comandos que dependem do stack semântico degradam para fallback determinístico (grep + Read). Mas se você tem mais de ~100 notas e quer recall por similaridade (não só keyword), vale ligar.
 
-**TL;DR**: rode os 3 comandos abaixo; documentação completa em `_bootstrap/agentic/README.md`.
+**TL;DR**: escolha o modo no `install.sh` (docker ou nativo, com ou sem GPU) e rode os 2 comandos abaixo; documentação completa em `_bootstrap/agentic/README.md`.
 
 ```bash
-docker compose -f _bootstrap/agentic/docker-compose.yml up -d
-docker exec sb-ollama ollama pull bge-m3
+bash _bootstrap/agentic/stack.sh setup   # baixa imagens/binários + modelo bge-m3
 bash .claude/scripts/sb-reindex.sh
 ```
 
@@ -53,7 +52,7 @@ bash .claude/scripts/sb-reindex.sh status
 ### Por que adotar
 
 - **Recall semântico**: `/search "como tratamos idempotência?"` recupera a decisão certa mesmo se você não lembra o termo exato — bge-m3 entende sinônimos e paráfrases.
-- **Local-first**: nada sai da máquina. Vault e embeddings ficam em containers locais.
+- **Local-first**: nada sai da máquina. Vault e embeddings ficam locais (containers ou processos nativos, conforme o modo).
 - **Sem custo recorrente**: zero API key, zero billing.
 - **Determinístico**: a mesma query sempre retorna os mesmos top-K.
 
@@ -61,7 +60,7 @@ bash .claude/scripts/sb-reindex.sh status
 
 | | Com stack | Sem stack |
 |---|---|---|
-| Setup | +Docker, ~3GB disco, ~512MB RAM idle | Zero |
+| Setup | Docker OU nativo (sem virtualização), ~3GB disco, ~512MB RAM idle | Zero |
 | Recall | Semântico (sinônimos, paráfrases) | Só keyword via grep |
 | Manutenção | `/reindex` após mudanças grandes | Nenhuma |
 | Privacidade | 100% local | 100% local (igual) |
@@ -71,7 +70,6 @@ bash .claude/scripts/sb-reindex.sh status
 ### Quando NÃO ativar
 
 - Vault com <50 notas (grep resolve)
-- Não quer Docker no ambiente
 - Máquina restrita (<2GB RAM disponível)
 
 Detalhes completos, fallbacks por comando, alternativas consideradas e setup de GPU: **`_bootstrap/agentic/README.md`**.

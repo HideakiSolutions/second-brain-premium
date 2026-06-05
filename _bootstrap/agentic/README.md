@@ -11,7 +11,9 @@ Stack local de busca semântica + style profiler + curator + predictor. Tudo opc
 | `curator/` | Heurísticas de curadoria (clusters, órfãos, tags, stale ADRs) | Python | standalone (com FalkorDB opcional, atualmente removido) |
 | `style/profiler.py` | Style profiler empírico dos seus artigos | Python | standalone |
 | `predictor/` | Sugestões de próximas tasks via heurísticas + LLM | Python | usa Anthropic API se `ANTHROPIC_API_KEY` setada; cai para fallback determinístico sem |
-| `docker-compose.yml` | Sobe Qdrant + Ollama em containers locais | Docker | requer Docker daemon |
+| `stack.sh` | Gerencia Qdrant + Ollama em modo **docker** ou **nativo** (setup/start/stop/status) | Bash | modo docker requer Docker; modo nativo não |
+| `docker-compose.yml` | Definição dos containers (usado pelo `stack.sh` no modo docker) | Docker | requer Docker daemon |
+| `docker-compose.gpu.yml` | Override de GPU NVIDIA para o ollama (aplicado quando `SB_STACK_GPU=on`) | Docker | requer NVIDIA Container Toolkit |
 
 ---
 
@@ -36,15 +38,16 @@ A query do usuário (ex.: "como tratamos idempotência em sagas?") vira embeddin
 ### Quando NÃO usar
 
 - Você só vai ter <50 documentos no vault (grep resolve)
-- Não quer adicionar Docker ao stack pessoal
 - Trabalha numa máquina muito restrita (<2GB RAM disponível)
 - Prefere consultas só via comandos LLM puros (`/ask` cai para fallback grep + Read)
+
+(Docker deixou de ser exigência: o modo **nativo** roda Qdrant binário + Ollama direto no SO.)
 
 ### Trade-offs
 
 | Aspecto | Pró | Contra |
 |---|---|---|
-| Setup | Um `docker compose up -d`; <10 min para estar operacional | Requer Docker; adiciona dependência ao seu ambiente |
+| Setup | Um `stack.sh setup`; <10 min para estar operacional | Adiciona Qdrant+Ollama ao seu ambiente (via Docker ou nativo, à sua escolha) |
 | Recall | Encontra coisas que grep não acharia (sinônimos, paráfrases) | Falsos positivos em queries genéricas — precisa filtrar por `--kind` ou `--project` |
 | Manutenção | Reindex incremental via `/reindex`; ~5s para o vault inteiro | Precisa rerodar `/reindex` após mudanças grandes |
 | Privacidade | 100% local; embeddings e índice nunca saem do disco | Modelos open-source (bge-m3) — não state-of-the-art como modelos proprietários |
@@ -62,23 +65,35 @@ A query do usuário (ex.: "como tratamos idempotência em sagas?") vira embeddin
 
 ## Como usar
 
-### Subir o stack
+### Escolher o modo (uma vez)
 
-```bash
-docker compose -f _bootstrap/agentic/docker-compose.yml up -d
+O `install.sh` pergunta o modo e grava em `stack.env` (por máquina, gitignorado):
+
+```
+SB_STACK_MODE=docker   # docker | native
+SB_STACK_GPU=off       # on | off
 ```
 
-Sobe dois containers (binds em 127.0.0.1):
-- `sb-qdrant` em `6333` (REST) e `6334` (gRPC)
-- `sb-ollama` em `11434`
+- **docker** — Qdrant + Ollama em containers (binds em 127.0.0.1: Qdrant `6333`/`6334`, Ollama `11434`)
+- **native** — binário oficial do Qdrant (baixado para `native/`, gitignorado) + Ollama instalado no SO. Sem virtualização: GPU dedicada é usada diretamente pelo Ollama.
 
-### Baixar o modelo de embeddings
+Os dois modos compartilham o storage em `data/qdrant` (mesma versão do Qdrant nos dois) — dá para alternar sem reindexar.
+
+### Setup (primeira vez)
 
 ```bash
-docker exec sb-ollama ollama pull bge-m3
+bash _bootstrap/agentic/stack.sh setup
 ```
 
-(~1.2GB de download na primeira vez.)
+Baixa imagens/binários e o modelo `bge-m3` (~1.2GB na primeira vez). No modo nativo, se o Ollama não estiver instalado, o script orienta a instalação por plataforma. Se o registry do Ollama estiver inacessível na sua rede, o script mostra o fallback: GGUF do Hugging Face + `ollama create`.
+
+### Subir / parar
+
+```bash
+bash _bootstrap/agentic/stack.sh start
+bash _bootstrap/agentic/stack.sh stop     # docker: compose stop; nativo: só processos que o script subiu
+bash _bootstrap/agentic/stack.sh status
+```
 
 ### Indexar o vault
 
@@ -109,16 +124,13 @@ Ou via slash command no Claude Code:
 bash .claude/scripts/sb-reindex.sh status
 ```
 
-### Desligar (preserva dados)
-
-```bash
-docker compose -f _bootstrap/agentic/docker-compose.yml stop
-```
-
 ### Remover (apaga dados indexados)
 
 ```bash
+# modo docker:
 docker compose -f _bootstrap/agentic/docker-compose.yml down -v
+# modo nativo: pare a stack e apague o storage
+bash _bootstrap/agentic/stack.sh stop && rm -rf _bootstrap/agentic/data/qdrant _bootstrap/agentic/native
 ```
 
 ---
@@ -159,7 +171,10 @@ Você pode rodar o vault inteiro sem nunca subir Docker. O stack está aqui para
 
 ## GPU (opcional)
 
-bge-m3 roda bem em CPU. Se você tem GPU NVIDIA (>4GB VRAM), descomente o bloco `deploy.resources` em `docker-compose.yml` para acelerar embeddings em ~5x. Sem GPU, ingestão de 1000 documentos leva ~2 minutos; com GPU, ~25 segundos.
+bge-m3 roda bem em CPU. Com GPU NVIDIA (>4GB VRAM), embeddings aceleram ~5x — ingestão de 1000 documentos cai de ~2 minutos para ~25 segundos. Configure `SB_STACK_GPU=on` em `stack.env` (o installer pergunta, com default por auto-detecção de `nvidia-smi`):
+
+- **Modo docker**: o `stack.sh` aplica o override `docker-compose.gpu.yml` automaticamente. Requer NVIDIA Container Toolkit no host.
+- **Modo nativo**: o Ollama detecta e usa a GPU sozinho — sem camada de virtualização no caminho. Com `SB_STACK_GPU=off`, o `stack.sh` força CPU (oculta as GPUs via env) ao subir o `ollama serve`. Se o Ollama roda como serviço do SO, gerencie a GPU pela config do próprio serviço.
 
 ---
 
@@ -169,10 +184,9 @@ bge-m3 roda bem em CPU. Se você tem GPU NVIDIA (>4GB VRAM), descomente o bloco 
 - Você tem 100+ notas e quer recall semântico
 - Quer privacidade total (nada sai da máquina)
 - Quer commands `/ask`, `/search`, `/justify` com qualidade superior
-- Tem Docker disponível e 6GB de disco livre
+- Tem ~6GB de disco livre (Docker OU modo nativo — você escolhe)
 
 ❌ **Não, deixe desligado se:**
 - Vault tem <50 notas — grep + Read resolvem
-- Não pode/quer rodar Docker
 - Trabalha numa máquina restrita
 - Aceita os fallbacks determinísticos

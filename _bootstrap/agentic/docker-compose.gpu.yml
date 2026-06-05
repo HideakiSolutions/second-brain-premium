@@ -1,0 +1,14 @@
+# Override de GPU NVIDIA para o servico ollama.
+# Requer NVIDIA Container Toolkit instalado no host.
+#
+# Uso (o stack.sh aplica automaticamente quando SB_STACK_GPU=on):
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

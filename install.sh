@@ -20,7 +20,7 @@
 #   3. Hooks            -> ~/.claude/settings.json (merge idempotente)
 #   4. CLAUDE.md global -> ~/.claude/CLAUDE.md (append seção Second Brain)
 #   5. Crons            -> linhas para colar manualmente no crontab
-#   6. Stack semantico  -> instrucoes para subir Qdrant + Ollama (opcional)
+#   6. Stack semantico  -> Qdrant + Ollama em modo docker ou nativo (opcional)
 #
 # Cada componente e opt-in: usuario aprova individualmente.
 
@@ -275,6 +275,7 @@ if [ "$UNINSTALL" -eq 1 ]; then
   log "  - $HOME/.claude/settings.json  (remova entradas hook apontando para $VAULT_ROOT)"
   log "  - $HOME/.claude/CLAUDE.md      (remova bloco 'Second Brain' se houver)"
   log "  - crontab -e                   (remova linhas de cron)"
+  log "  - $VAULT_ROOT/_bootstrap/agentic/{stack.env,native/}  (config e binarios da stack, por maquina)"
   exit 0
 fi
 
@@ -511,32 +512,89 @@ EOF
 fi
 
 # ============================================================================
-# 6. Stack semantico (instrucoes)
+# 6. Stack semantico (escolha de modo: docker | native | nenhum)
 # ============================================================================
 
-if [ "$MINIMAL" -eq 0 ] && command -v docker >/dev/null 2>&1; then
+if [ "$MINIMAL" -eq 0 ]; then
   title "6. Stack semantico opcional (Qdrant + Ollama)"
 
-  if confirm "Mostrar comandos para subir o stack?" N; then
-    cat <<EOF
+  # Auto-deteccao para defaults
+  HAS_DOCKER=0; command -v docker >/dev/null 2>&1 && HAS_DOCKER=1
+  HAS_GPU=0;   command -v nvidia-smi >/dev/null 2>&1 && HAS_GPU=1
+  STACK_MODE_DEFAULT="native"; [ "$HAS_DOCKER" -eq 1 ] && STACK_MODE_DEFAULT="docker"
+
+  cat <<EOF
 
 Stack semantico habilita /ask, /search, /justify com recall semantico. Sem ele,
 todos os comandos degradam para fallback grep. Tudo local, sem custo recorrente.
 
-Subir o stack:
-${C_DIM}docker compose -f "$VAULT_ROOT/_bootstrap/agentic/docker-compose.yml" up -d
-docker exec sb-ollama ollama pull bge-m3
+Modos disponiveis:
+  docker  - Qdrant + Ollama em containers $([ "$HAS_DOCKER" -eq 1 ] && echo "(docker detectado)" || echo "(docker NAO detectado)")
+  native  - binario oficial do Qdrant + Ollama instalado no SO, sem virtualizacao
+            (GPU dedicada usada diretamente pelo Ollama)
+  nenhum  - pula; comandos usam fallback grep
+
+EOF
+
+  STACK_MODE=""
+  if [ "$INTERACTIVE" -eq 0 ]; then
+    STACK_MODE="$STACK_MODE_DEFAULT"
+  else
+    while [ -z "$STACK_MODE" ]; do
+      printf "Modo da stack? (docker/native/nenhum) %s[%s]%s " "$C_DIM" "$STACK_MODE_DEFAULT" "$C_RESET" >&2
+      read -r STACK_REPLY </dev/tty || STACK_REPLY=""
+      STACK_REPLY="${STACK_REPLY:-$STACK_MODE_DEFAULT}"
+      case "$STACK_REPLY" in
+        docker|d) STACK_MODE="docker" ;;
+        native|nativo|n) STACK_MODE="native" ;;
+        nenhum|none|x) STACK_MODE="none" ;;
+        *) printf "%sResponda docker, native ou nenhum.%s\n" "$C_YELLOW" "$C_RESET" >&2 ;;
+      esac
+    done
+  fi
+
+  if [ "$STACK_MODE" = "none" ]; then
+    info "stack semantico: SKIP (fallback grep nos comandos)"
+  else
+    if [ "$STACK_MODE" = "docker" ] && [ "$HAS_DOCKER" -eq 0 ]; then
+      warn "docker nao detectado — instale-o antes de rodar o setup da stack"
+    fi
+    GPU_DEFAULT="N"; [ "$HAS_GPU" -eq 1 ] && GPU_DEFAULT="Y"
+    STACK_GPU="off"
+    if confirm "Usar GPU NVIDIA? $([ "$HAS_GPU" -eq 1 ] && echo '(nvidia-smi detectado)' || echo '(nvidia-smi nao detectado)')" "$GPU_DEFAULT"; then
+      STACK_GPU="on"
+    fi
+
+    STACK_ENV_FILE="$VAULT_ROOT/_bootstrap/agentic/stack.env"
+    if [ "$DRY_RUN" -eq 1 ]; then
+      info "(dry-run) escreveria $STACK_ENV_FILE com:"
+      log "  SB_STACK_MODE=$STACK_MODE"
+      log "  SB_STACK_GPU=$STACK_GPU"
+    else
+      backup_file "$STACK_ENV_FILE"
+      cat > "$STACK_ENV_FILE" <<EOF
+# Gerado por install.sh — config por maquina (nao versionar)
+SB_STACK_MODE=$STACK_MODE
+SB_STACK_GPU=$STACK_GPU
+EOF
+      ok "config da stack gravada em $STACK_ENV_FILE (modo=$STACK_MODE, gpu=$STACK_GPU)"
+    fi
+
+    if [ "$DRY_RUN" -eq 0 ] && [ "$INTERACTIVE" -eq 1 ] && confirm "Rodar o setup da stack agora? (download de imagens/binarios + modelo ~1.2GB)" N; then
+      bash "$VAULT_ROOT/_bootstrap/agentic/stack.sh" setup || warn "setup da stack falhou — rode manualmente depois"
+    else
+      cat <<EOF
+
+Para concluir depois:
+${C_DIM}bash "$VAULT_ROOT/_bootstrap/agentic/stack.sh" setup
 bash "$VAULT_ROOT/.claude/scripts/sb-reindex.sh"${C_RESET}
 
 Trade-offs e detalhes: $VAULT_ROOT/_bootstrap/agentic/README.md
 
 EOF
-    SUMMARY[agentic_shown]=1
-  else
-    info "stack semantico: SKIP (instrucoes nao mostradas)"
+    fi
+    SUMMARY[agentic_mode]="$STACK_MODE"
   fi
-elif [ "$MINIMAL" -eq 0 ]; then
-  warn "docker nao encontrado — pulando stack semantico opcional"
 fi
 
 # ============================================================================
@@ -552,7 +610,7 @@ log "Skills Codex         $([ -n "${SUMMARY[skills]:-}" ] && echo "${SUMMARY[ski
 log "Hooks settings.json  $([ -n "${SUMMARY[hooks]:-}" ] && echo "configurado" || echo "skip")"
 log "CLAUDE.md global     $([ -n "${SUMMARY[claude_md]:-}" ] && echo "atualizado" || echo "skip")"
 log "Crons (instrucoes)   $([ -n "${SUMMARY[crons]:-}" ] && echo "mostradas" || echo "skip")"
-log "Stack semantico      $([ -n "${SUMMARY[agentic_shown]:-}" ] && echo "instrucoes mostradas" || echo "skip")"
+log "Stack semantico      $([ -n "${SUMMARY[agentic_mode]:-}" ] && echo "modo ${SUMMARY[agentic_mode]}" || echo "skip")"
 log ""
 [ "$DRY_RUN" -eq 1 ] && warn "MODO DRY-RUN — nenhuma alteracao foi efetivada" || true
 log ""

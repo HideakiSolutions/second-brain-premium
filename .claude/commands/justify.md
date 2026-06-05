@@ -25,7 +25,7 @@ Validar infra:
 bash .claude/scripts/sb-reindex.sh status
 ```
 
-Se Qdrant offline, parar e instruir: `cd _bootstrap/agentic && docker compose up -d`.
+Se Qdrant offline, parar e instruir: `bash _bootstrap/agentic/stack.sh start`.
 
 ### 2. Identificar conceitos centrais
 

@@ -7,12 +7,13 @@ Stdlib-only (urllib + json) para evitar dependências externas.
 from __future__ import annotations
 
 import json
+import os
 import urllib.error
 import urllib.request
 from typing import Any
 
-OLLAMA_URL = "http://127.0.0.1:11434"
-QDRANT_URL = "http://127.0.0.1:6333"
+OLLAMA_URL = os.environ.get("SB_OLLAMA_URL", "http://127.0.0.1:11434")
+QDRANT_URL = os.environ.get("SB_QDRANT_URL", "http://127.0.0.1:6333")
 EMBED_MODEL = "bge-m3"
 EMBED_DIM = 1024
 COLLECTION = "secondbrain"

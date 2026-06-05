@@ -48,7 +48,7 @@ operacional, mantenha a skill correspondente e rode a suíte local.
 ## Stack De Memória
 
 - Vault Markdown: fonte humana e rastreável (sempre).
-- Qdrant: busca vetorial (opcional — `_bootstrap/agentic/docker-compose.yml`).
+- Qdrant: busca vetorial (opcional — `bash _bootstrap/agentic/stack.sh setup`, modo docker ou nativo).
 - Ollama + `bge-m3`: embeddings locais (opcional, casado com Qdrant).
 - Scripts `.claude/scripts/`: indexação, busca, densificação, lint e métricas.
 

@@ -11,6 +11,7 @@ Subcomandos:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from pathlib import Path
@@ -33,7 +34,9 @@ from store import (  # type: ignore
     upsert_points,
 )
 
-VAULT_ROOT = Path("$VAULT")
+# VAULT_ROOT: env var (definida por sb-reindex.sh) com fallback para a raiz
+# do vault inferida pela posição deste arquivo (_bootstrap/agentic/indexer/).
+VAULT_ROOT = Path(os.environ.get("VAULT_ROOT", str(Path(__file__).resolve().parents[3])))
 
 
 def _check_infra() -> bool:
@@ -45,7 +48,7 @@ def _check_infra() -> bool:
         print("[indexer] Ollama indisponível em http://127.0.0.1:11434", file=sys.stderr)
         ok = False
     elif not ollama_has_model(EMBED_MODEL):
-        print(f"[indexer] Modelo '{EMBED_MODEL}' não está em Ollama. Rode: docker exec sb-ollama ollama pull {EMBED_MODEL}", file=sys.stderr)
+        print(f"[indexer] Modelo '{EMBED_MODEL}' não está em Ollama. Rode: bash _bootstrap/agentic/stack.sh setup", file=sys.stderr)
         ok = False
     return ok
 
@@ -166,7 +169,7 @@ def cmd_status(args: argparse.Namespace) -> int:
     print("[indexer] Qdrant: online")
     if ollama_ready():
         has = ollama_has_model(EMBED_MODEL)
-        print(f"[indexer] Ollama: online · modelo {EMBED_MODEL}: {'✓' if has else '✗ (rode: docker exec sb-ollama ollama pull ' + EMBED_MODEL + ')'}")
+        print(f"[indexer] Ollama: online · modelo {EMBED_MODEL}: {'✓' if has else '✗ (rode: bash _bootstrap/agentic/stack.sh setup)'}")
     else:
         print("[indexer] Ollama: OFFLINE")
     stats = collection_stats(COLLECTION)

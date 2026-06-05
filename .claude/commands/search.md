@@ -41,7 +41,7 @@ Não inventar resultados. O script consulta Qdrant local e retorna chunks com:
 
 ## Pré-requisito
 
-Containers `sb-qdrant` e `sb-ollama` rodando. Verificar com:
+Qdrant e Ollama de pé (docker ou nativo — `bash _bootstrap/agentic/stack.sh start`). Verificar com:
 ```bash
 bash .claude/scripts/sb-reindex.sh status
 ```

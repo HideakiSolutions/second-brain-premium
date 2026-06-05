@@ -44,14 +44,13 @@ bash .claude/scripts/sb-reindex.sh [args]
 
 ## Custos
 
-- 100% local. Embeddings via Ollama bge-m3 na CPU.
-- ~1-2 chunks/segundo. Vault de 2700 chunks → ~25-30 minutos para bootstrap completo.
-- Re-indexação parcial é instantânea.
+- 100% local. Embeddings via Ollama bge-m3 (GPU se disponível; CPU caso contrário).
+- CPU: ~1-2 chunks/segundo; GPU: ~5 chunks/segundo. Re-indexação parcial é instantânea.
 
 ## Pré-requisito
 
-Containers Docker iniciados:
+Stack semântica de pé (docker ou nativo, conforme `stack.env`):
 ```bash
-cd _bootstrap/agentic && docker compose up -d
-docker exec sb-ollama ollama pull bge-m3   # apenas primeira vez (~1.2GB)
+bash _bootstrap/agentic/stack.sh setup   # primeira vez (binários/imagens + modelo ~1.2GB)
+bash _bootstrap/agentic/stack.sh start   # sessões seguintes
 ```

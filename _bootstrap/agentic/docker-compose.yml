@@ -24,15 +24,8 @@ services:
       - "127.0.0.1:11434:11434"
     volumes:
       - ./data/ollama:/root/.ollama
-    # Embeddings via CPU são suficientes para 374 docs do vault.
-    # Se houver GPU NVIDIA, descomentar:
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
+    # Embeddings via CPU funcionam bem. Para GPU NVIDIA use o override
+    # docker-compose.gpu.yml (o stack.sh aplica quando SB_STACK_GPU=on).
     healthcheck:
       test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
       interval: 30s

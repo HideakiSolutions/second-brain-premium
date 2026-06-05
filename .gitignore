@@ -34,6 +34,12 @@ _memory/.pre-compact-notes.md
 # Bootstrap/install local state
 .second-brain/
 
+# Stack semantica: config por maquina + binarios/dados nativos
+_bootstrap/agentic/stack.env
+_bootstrap/agentic/stack.env.bak.*
+_bootstrap/agentic/native/
+_bootstrap/agentic/data/
+
 # Event broker (Fase B): eventos transient ao processamento
 _memory/.events/in/
 _memory/.events/dlq/

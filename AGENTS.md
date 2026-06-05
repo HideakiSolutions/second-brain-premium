@@ -298,7 +298,7 @@ _pipeline/                         <- RFCs, planos ativos, inbox de auto-capture
 _infrastructure/                   <- snapshots de infra operacional (opcional)
 _prompts/                          <- prompts reutilizáveis de setup, diagnóstico e onboarding
 _bootstrap/                        <- templates, git hooks, stack agentic (Qdrant+Ollama opcional)
-  agentic/                         <- _bootstrap/agentic/docker-compose.yml sobe stack;
+  agentic/                         <- stack.sh sobe a stack (modo docker ou nativo);
                                       ver _bootstrap/agentic/README.md para porquês,
                                       trade-offs e setup detalhado
   templates/                       <- templates de projeto/decision/state

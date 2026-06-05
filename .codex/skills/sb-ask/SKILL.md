@@ -39,7 +39,7 @@ Validar que infra está rodando:
 bash .claude/scripts/sb-reindex.sh status
 ```
 
-Se Qdrant ou Ollama estiverem offline, parar e informar usuário (sugerir `cd _bootstrap/agentic && docker compose up -d`).
+Se Qdrant ou Ollama estiverem offline, parar e informar usuário (sugerir `bash _bootstrap/agentic/stack.sh start`).
 
 ### 2. Detectar intenção (intent dispatch)
 
