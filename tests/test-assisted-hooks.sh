@@ -33,5 +33,20 @@ if ! grep -q "post-merge-recorder" "$INBOX" 2>/dev/null; then
   exit 1
 fi
 
+mkdir -p "$TMP/_knowledge/projects/assisted-hooks"
+cat > "$TMP/_knowledge/projects/assisted-hooks/state.md" <<'EOF'
+# Assisted Hooks
+- Precedente: preflight deve consultar memoria antes de execucao.
+EOF
+PREFLIGHT_OUT=$(printf '%s' '{"prompt":"validar memoria antes de implementar","cwd":"/tmp/assisted-hooks","project":"assisted-hooks"}' | \
+  SB_AGENT_OFFLINE=1 VAULT="$TMP" bash .claude/scripts/on-prompt-submit.sh)
+echo "$PREFLIGHT_OUT" | grep -q "\[MEMORY\]" || { echo "FAIL: UserPromptSubmit nao chamou preflight"; exit 1; }
+
+printf '%s' '{"hook_event_name":"PreCompact","cwd":"/tmp/assisted-hooks"}' | VAULT="$TMP" bash .claude/scripts/on-pre-compact.sh
+grep -q "memory-reviewer | pre-compact" "$TMP/_memory/activity-log.md" || { echo "FAIL: PreCompact nao chamou sync"; exit 1; }
+
+printf '%s' '{"hook_event_name":"SessionEnd","cwd":"/tmp/assisted-hooks"}' | VAULT="$TMP" bash .claude/scripts/on-session-end.sh
+grep -q "memory-reviewer | session-end" "$TMP/_memory/activity-log.md" || { echo "FAIL: SessionEnd nao chamou sync"; exit 1; }
+
 echo "OK: hooks assistidos simulados"
 exit 0

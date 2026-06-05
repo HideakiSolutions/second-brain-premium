@@ -25,13 +25,13 @@ if ! bash "$LINT" "$TMP/clean.md" >/dev/null; then
   exit 1
 fi
 
-# Caso 2: input com path privado deve retornar exit 1
+# Caso 2: input com IP privado deve retornar exit 1
 cat > "$TMP/dirty.md" <<'EOF'
 ---
 tags: [test]
 ---
 # Dirty
-Path: /opt/hideakisolutions/second-brain/foo
+Host: 192.168.1.10
 EOF
 
 if bash "$LINT" "$TMP/dirty.md" >/dev/null 2>&1; then

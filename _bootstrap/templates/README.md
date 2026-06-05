@@ -48,4 +48,4 @@ Todo arquivo de projeto deve seguir o template correspondente. Lint (`weekly-vau
 - `work-log.md` — formato livre append-only por data, sem requisitos de link mínimo
 - `roadmap.md` — formato livre estruturado por fase
 - `integrations.md` — formato livre, links emergem naturalmente
-- `agents.md`, `skills.md`, `workflows.md`, `servers.md`, `policies.md`, `structure.md` — específicos de hseos/mcp-factory/platform-gitops, sem template fixo
+- `agents.md`, `skills.md`, `workflows.md`, `servers.md`, `policies.md`, `structure.md` — específicos do seu ambiente operacional, sem template fixo

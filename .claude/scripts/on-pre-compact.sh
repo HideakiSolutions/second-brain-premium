@@ -54,4 +54,7 @@ if ! grep -q "session-end | .*—" "$LOG" 2>/dev/null; then
   printf '%s\n' "$TODAY" > "$FLAG"
 fi
 
+VAULT="$VAULT" bash "$(dirname "$0")/sb-agent-sync.sh" \
+  --runtime claude --cwd "$PWD" --trigger pre-compact --summary "contexto compactado" --event-id "$TIMESTAMP" >/dev/null 2>&1 || true
+
 exit 0

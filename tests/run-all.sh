@@ -36,6 +36,7 @@ run_suite "learn-loop"           "tests/test-learn-loop.sh"
 run_suite "workflow-commands"     "tests/test-workflow-commands.sh"
 run_suite "codex-parity"          "tests/test-codex-parity.sh"
 run_suite "secret-guard"          "tests/test-secret-guard.sh"
+run_suite "agent-memory-reviewer" "tests/test-agent-memory-reviewer.sh"
 run_suite "assisted-hooks"        "tests/test-assisted-hooks.sh"
 
 echo ""

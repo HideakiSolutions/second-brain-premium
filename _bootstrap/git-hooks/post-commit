@@ -8,7 +8,12 @@
 
 set -e
 
-VAULT_EVENTS_IN="/opt/hideakisolutions/second-brain/_memory/.events/in"
+VAULT_ROOT="${VAULT_ROOT:-${VAULT:-}}"
+if [ -z "$VAULT_ROOT" ]; then
+  VAULT_ROOT="$(git config --global --get second-brain.vault 2>/dev/null || true)"
+fi
+[ -n "$VAULT_ROOT" ] || exit 0
+VAULT_EVENTS_IN="$VAULT_ROOT/_memory/.events/in"
 [ -d "$VAULT_EVENTS_IN" ] || exit 0
 
 REPO_PATH="$(git rev-parse --show-toplevel 2>/dev/null || true)"

@@ -24,7 +24,7 @@ done < <(find .claude/commands -maxdepth 1 -type f -name "*.md" | sort)
 # CI runners (and any machine without the global runtime installed) have no
 # ~/.codex — skip the parity diff there instead of failing the suite.
 GLOBAL_CODEX="${CODEX_HOME:-$HOME/.codex}/skills"
-if [ -d "$GLOBAL_CODEX" ]; then
+if [ -d "$GLOBAL_CODEX" ] && find "$GLOBAL_CODEX" -maxdepth 1 -type d -name "sb-*" | grep -q .; then
   while IFS= read -r skill_dir; do
     name="$(basename "$skill_dir")"
     if [ -d "$GLOBAL_CODEX/$name" ]; then
@@ -35,7 +35,7 @@ if [ -d "$GLOBAL_CODEX" ]; then
     fi
   done < <(find .codex/skills -maxdepth 1 -type d -name "sb-*" | sort)
 else
-  echo "SKIP: runtime global Codex ausente ($GLOBAL_CODEX) — parity diff ignorado"
+  echo "SKIP: runtime global Codex sb-* ausente ($GLOBAL_CODEX) — parity diff ignorado"
 fi
 
 if [ "$FAIL" -eq 0 ]; then

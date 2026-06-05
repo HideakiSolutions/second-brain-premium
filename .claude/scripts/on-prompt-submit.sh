@@ -33,6 +33,9 @@ printf '%s' "$INPUT" | bash "$SCRIPT_DIR/secret-leak-guard.sh" prompt || true
 printf '%s' "$INPUT" | bash "$SCRIPT_DIR/continue-contract.sh" || true
 printf '%s' "$INPUT" | bash "$SCRIPT_DIR/validation-tier-suggest.sh" || true
 printf '%s' "$INPUT" | bash "$SCRIPT_DIR/post-merge-recorder.sh" || true
+if echo "$PROMPT" | grep -qiE "implement|implemente|corrigir|fix|build|criar|adicionar|alterar|update|atualizar|rodar|run|test|validar|deploy|merge|commit|decision|decisao|pergunta|question|como|por que"; then
+  printf '%s' "$INPUT" | VAULT="$VAULT" bash "$SCRIPT_DIR/sb-agent-preflight.sh" --runtime claude --cwd "$CWD" || true
+fi
 
 # Verificar se há alerta de consolidação pendente
 CONSOLIDATION_FLAG="$VAULT/_memory/.consolidation-ready"
@@ -62,8 +65,7 @@ fi
 touch "$ALERTED_TODAY"
 
 # Injetar state.md do projeto ativo (uma vez por dia por projeto)
-PROJECT_NAME="${CWD##*<projects-root>/}"
-PROJECT_NAME="${PROJECT_NAME%%/*}"
+PROJECT_NAME="${CWD##*/}"
 STATE_FILE="$VAULT/_knowledge/projects/${PROJECT_NAME}/state.md"
 STATE_INJECTED_FLAG="/tmp/claude-state-injected-$(date +%Y%m%d)-${PROJECT_NAME}"
 
