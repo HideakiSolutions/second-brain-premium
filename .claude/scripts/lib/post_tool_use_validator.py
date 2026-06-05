@@ -20,7 +20,7 @@ import re
 import sys
 from pathlib import Path
 
-VAULT_ROOT = Path(__file__).resolve().parents[3]
+VAULT_ROOT = Path(os.environ.get("VAULT_ROOT") or os.environ.get("VAULT") or Path(__file__).resolve().parents[3]).resolve()
 TAXONOMY_PATH = VAULT_ROOT / "_index" / "TAG-TAXONOMY.md"
 
 LAYER_TAGS = {

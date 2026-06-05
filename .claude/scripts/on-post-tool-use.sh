@@ -9,7 +9,8 @@
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VAULT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+VAULT_ROOT="${VAULT_ROOT:-${VAULT:-$(cd "$SCRIPT_DIR/../.." && pwd)}}"
+export VAULT_ROOT VAULT="${VAULT:-$VAULT_ROOT}"
 VALIDATOR="$SCRIPT_DIR/lib/post_tool_use_validator.py"
 INPUT=$(cat)
 
@@ -30,4 +31,6 @@ rc="${rc:-0}"
 if [ "${LINT_STRICT:-0}" = "1" ] && [ "$rc" -eq 2 ]; then
     exit 2
 fi
+
+printf '%s' "$INPUT" | bash "$SCRIPT_DIR/sb-semantic-index-queue.sh" >/dev/null 2>&1 || true
 exit 0

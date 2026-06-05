@@ -57,4 +57,6 @@ fi
 VAULT="$VAULT" bash "$(dirname "$0")/sb-agent-sync.sh" \
   --runtime claude --cwd "$PWD" --trigger pre-compact --summary "contexto compactado" --event-id "$TIMESTAMP" >/dev/null 2>&1 || true
 
+VAULT="$VAULT" bash "$(dirname "$0")/sb-semantic-index-flush.sh" --max-files "${SB_SEMANTIC_INDEX_FLUSH_MAX:-25}" >/dev/null 2>&1 || true
+
 exit 0

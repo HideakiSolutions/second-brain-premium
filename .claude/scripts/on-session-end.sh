@@ -43,9 +43,11 @@ printf '\n## [%s] session-end | vault\n' "$TIMESTAMP" >> "$LOG"
 VAULT="$VAULT" bash "$(dirname "$0")/sb-agent-sync.sh" \
   --runtime claude --cwd "$PWD" --trigger session-end --summary "sessao encerrada" --event-id "$TIMESTAMP" >/dev/null 2>&1 || true
 
+VAULT="$VAULT" bash "$(dirname "$0")/sb-semantic-index-flush.sh" --max-files "${SB_SEMANTIC_INDEX_FLUSH_MAX:-25}" >/dev/null 2>&1 || true
+
 # Atualizar snapshot de infra se sessão envolveu mudanças relacionadas
 TRANSCRIPT_FILE="/tmp/claude-session-transcript-${PWD##*/}"
-if [ -f "$TRANSCRIPT_FILE" ] && grep -qiE "kubectl|argocd|platform-gitops|namespace|deploy|k8s|kubernetes" "$TRANSCRIPT_FILE" 2>/dev/null; then
+if [ -f "$TRANSCRIPT_FILE" ] && grep -qiE "kubectl|argocd|namespace|deploy|gitops|k8s|kubernetes" "$TRANSCRIPT_FILE" 2>/dev/null; then
   bash "$(dirname "$0")/infra-snapshot.sh" 2>/dev/null &
 fi
 
