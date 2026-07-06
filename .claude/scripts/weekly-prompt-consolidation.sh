@@ -61,5 +61,6 @@ touch "$FLAG"
 echo "[$TIMESTAMP] weekly-prompt-consolidation: $PROMPT_COUNT prompts acumulados. Flag criada — aviso aparecerá no próximo prompt."
 
 if [ -x "$VAULT/.claude/scripts/sb-agent-learn.sh" ]; then
-  VAULT="$VAULT" bash "$VAULT/.claude/scripts/sb-agent-learn.sh" --trigger weekly || true
+  export VAULT
+  bash "$VAULT/.claude/scripts/sb-agent-learn.sh" --trigger weekly || true
 fi
