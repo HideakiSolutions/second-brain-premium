@@ -17,7 +17,9 @@ fontes reutilizáveis para agentes Claude, Codex e runtimes equivalentes.
 Antes de trabalho produtivo:
 
 1. Carregue contexto mínimo com `/focus {projeto}` ou `sb-focus`.
-2. Para perguntas, use `/ask` ou `/search` antes de pedir contexto humano.
+2. Para perguntas, use `/ask`, `/recall` (recall associativo — traz o contexto
+   vizinho e a cadeia de memórias) ou `/search` (lookup pontual) antes de
+   pedir contexto humano.
 3. Para decisões, use `/justify` antes de pedir aprovação ou opinião.
 4. Execute e valide com gate proporcional.
 5. Em entrega verificável, rode `/delivery-closeout`.
@@ -46,6 +48,10 @@ Os comandos e skills têm paridade Claude/Codex. Ao criar ou alterar um comando
 operacional, mantenha a skill correspondente e rode a suíte local.
 
 ## Stack De Memória
+
+- Camada sináptica: grafo nota-a-nota com pesos, reforço por uso, decay e
+  consolidação (`_bootstrap/agentic/synapse/README.md`); recall associativo via
+  `/recall`; ciclo de "sono" via `/consolidate` + cron semanal.
 
 - Vault Markdown: fonte humana e rastreável (sempre).
 - Qdrant: busca vetorial (opcional — `bash _bootstrap/agentic/stack.sh setup`, modo docker ou nativo).
@@ -99,6 +105,8 @@ bash tests/run-all.sh
 |---|---|---|
 | Carregar projeto | `/focus {projeto}` | `sb-focus` |
 | Responder com fontes | `/ask` ou `/search` | `sb-ask` ou `sb-search` |
+| Recall associativo (memória puxa memória) | `/recall` | `sb-recall` |
+| Consolidar memória ("sono") | `/consolidate` | `sb-consolidate` |
 | Escolher próxima ação | `/beacon` | `sb-beacon` |
 | Ver portfolio/funil | `/pipeline` | `sb-pipeline` |
 | Validar precedente | `/justify` | `sb-justify` |

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Second Brain Sb Consolidate"
+  short_description: "Ciclo de consolidação da memória (sono) — compacta current-state"
+  default_prompt: "Use $sb-consolidate with the current task input."

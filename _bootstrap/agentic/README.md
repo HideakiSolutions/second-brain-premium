@@ -7,6 +7,9 @@ Stack local de busca semântica + style profiler + curator + predictor. Tudo opc
 | Componente | Função | Tipo | Externa? |
 |---|---|---|---|
 | `indexer/` | Chunking de markdown + push para Qdrant via embeddings Ollama | Python | depende Qdrant + Ollama |
+| `synapse/` | **Camada sináptica**: grafo nota-a-nota com sinapses tipadas+peso, recall associativo (spreading activation), reforço hebbiano, decay e consolidação — ver `synapse/README.md` | Python | recall por query depende Qdrant + Ollama; resto é 100% local (SQLite) |
+| `graph/` | Cliente FalkorDB para a projeção do grafo sináptico (graph `synapse`) | Python | depende FalkorDB (opcional, fail-soft) |
+| `mcp/secondbrain-mcp/` | MCP server: recall associativo + grafo como tools para qualquer sessão | Node | depende FalkorDB; tools de recall dependem da stack |
 | `eval/` | Benchmark de qualidade do retrieval | Python | depende indexer |
 | `curator/` | Heurísticas de curadoria (clusters, órfãos, tags, stale ADRs) | Python | standalone (com FalkorDB opcional, atualmente removido) |
 | `style/profiler.py` | Style profiler empírico dos seus artigos | Python | standalone |
@@ -160,6 +163,9 @@ Você pode rodar o vault inteiro sem nunca subir Docker. O stack está aqui para
 | `indexer/chunker.py` | Quebra markdown em chunks com heurísticas (headers, parágrafos, tabelas) |
 | `indexer/store.py` | Clientes HTTP para Qdrant e Ollama |
 | `indexer/main.py` | CLI: `index`, `search`, `status` |
+| `synapse/main.py` | CLI: `build`, `recall`, `explain`, `activate`, `reinforce`, `decay`, `sync-falkor`, `consolidate`, `status` |
+| `synapse/README.md` | Espec completa da camada sináptica (modelo, score, integrações) |
+| `graph/falkor_client.py` | Cliente FalkorDB (redis-py com fallback RESP2 raw socket) |
 | `eval/run_benchmark.py` | Roda queries-gabarito contra a collection (crie seu `benchmark.jsonl`) |
 | `curator/main.py` | CLI: `scan` (gera propostas), `report`, `clear` |
 | `curator/heuristics.py` | H1-H7: clusters, órfãs, tags, stale ADRs, etc. Algumas heurísticas (H5-H7) requerem FalkorDB e ficam desativadas sem ele |

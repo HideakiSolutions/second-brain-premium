@@ -49,6 +49,8 @@
 | Workflow | Claude | Codex |
 |---|---|---|
 | Ask/Q&A | `/ask` | `<vault>-ask` |
+| Recall associativo | `/recall` | `<vault>-recall` |
+| Memory consolidate | `/consolidate` | `<vault>-consolidate` |
 | Article draft | `/article-draft` | `<vault>-article-draft` |
 | Beacon | `/beacon` | `<vault>-beacon` |
 | Braindump | `/braindump` | `<vault>-braindump` |
@@ -85,6 +87,13 @@
 | UX product audit | `/ux-product-audit` | `<vault>-ux-product-audit` |
 | Weekly review | `/weekly-review` | `<vault>-weekly-review` |
 
+### Camada Sinaptica (memoria associativa)
+
+- O vault tem um grafo sinaptico nota-a-nota: sinapses tipadas com peso que fortalecem com uso (reforco hebbiano), enfraquecem com desuso (decay) e nascem de co-ativacao repetida (LEARNED). Espec: `_bootstrap/agentic/synapse/README.md`; ADR: `_decisions/2026-07-08-camada-sinaptica-memoria-associativa.md`.
+- **Recall associativo** (`/recall` ou `bash .claude/scripts/sb-synapse.sh recall`): sementes semanticas (Qdrant) + propagacao pelas sinapses + forca de uso. Cada resultado traz a cadeia de memorias que o trouxe. Prefira-o a `/search` quando o contexto vizinho importa; `--seed <slug>` expande a partir de uma nota e funciona offline.
+- **Ativacoes sao sinal**: leituras/escritas de notas e recalls registram ativacao (hooks automaticos). O `/end-session` roda o reforco da sessao (passo 8.75); o cron semanal roda decay + `/consolidate` (compactacao do current-state, expiracao de capturas, propostas de merge/link com gate humano, projecao FalkorDB graph `synapse`).
+- Estado sinaptico canonico: SQLite `_memory/.synapse/synapse.db` (gitignorado, da maquina; `synapse build` reconstroi dos arquivos). Markdown segue sendo a fonte da verdade. A projecao FalkorDB e near-online: sync incremental automatico apos build/reinforce/decay + reconciliacao full semanal.
+
 ### Fluxo Padrao De Desenvolvimento
 
 Fluxo recomendado para trabalho assistido:
@@ -107,7 +116,8 @@ runtimes equivalentes.
 
 1. Antes de iniciar trabalho produtivo, carregar contexto minimo do vault:
    - projeto identificado: usar `/focus {projeto}` ou skill Codex equivalente;
-   - pergunta sobre conteudo: usar `/ask` ou `/search`;
+   - pergunta sobre conteudo: usar `/ask`, `/recall` (associativo, traz o
+     contexto vizinho e a cadeia de memorias) ou `/search` (lookup pontual);
    - proposta, duvida de arquitetura, mudanca de padrao ou decisao: usar
      `/justify` ou busca em `_decisions/` antes de perguntar ao humano.
 2. Antes de pedir uma decisao humana, consultar o second-brain primeiro. A

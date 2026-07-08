@@ -39,6 +39,7 @@ run_suite "secret-guard"          "tests/test-secret-guard.sh"
 run_suite "agent-memory-reviewer" "tests/test-agent-memory-reviewer.sh"
 run_suite "semantic-index-queue"  "tests/test-semantic-index-queue.sh"
 run_suite "assisted-hooks"        "tests/test-assisted-hooks.sh"
+run_suite "synapse"               "tests/test-synapse.sh"
 
 echo ""
 echo "=========================================="

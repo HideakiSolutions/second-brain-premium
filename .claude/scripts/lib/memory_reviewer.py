@@ -27,7 +27,7 @@ from typing import Any
 VAULT = Path(os.environ.get("VAULT") or os.environ.get("VAULT_ROOT") or Path(__file__).resolve().parents[3])
 
 EXECUTION_RE = re.compile(
-    r"\b(implement|implemente|corrigir|corrija|fix|build|criar|create|adicionar|"
+    r"\b(implement\w*|corrigir|corrija|fix|build|criar|create|adicionar|"
     r"add|alterar|update|atualizar|rodar|run|test|validar|deploy|merge|commit|"
     r"decision|decisao|decidir|pergunta|question|como|why|por que)\b",
     re.IGNORECASE,
@@ -152,6 +152,35 @@ def should_preflight(payload: Payload) -> bool:
     return bool(EXECUTION_RE.search(haystack))
 
 
+def run_synapse_recall(query: str) -> list[str]:
+    """Recall associativo (sinapses): uma memoria puxa as vizinhas relevantes.
+
+    Ambient (preflight) usa --no-log para nao reforcar sinapses por injecao
+    automatica — so recalls deliberados geram sinal hebbiano.
+    """
+    if os.environ.get("SB_AGENT_OFFLINE") == "1":
+        return []
+    script = VAULT / ".claude" / "scripts" / "sb-synapse.sh"
+    if not script.exists():
+        return []
+    try:
+        proc = subprocess.run(
+            ["bash", str(script), "recall", query, "--k", "4", "--brief", "--no-log"],
+            cwd=str(VAULT),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=4,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return []
+    if proc.returncode != 0:
+        return []
+    lines = compact_lines(proc.stdout, limit=5)
+    return [line[2:] if line.startswith("- ") else line for line in lines]
+
+
 def run_sb_search(query: str) -> list[str]:
     if os.environ.get("SB_AGENT_OFFLINE") == "1":
         return []
@@ -236,7 +265,11 @@ def preflight(args: argparse.Namespace) -> int:
         return 0
     project = resolve_project(payload)
     query = " ".join(part for part in [project, payload.intent] if part).strip()
-    context = run_sb_search(query) or fallback_context(project, payload.intent)
+    context = (
+        run_synapse_recall(query)
+        or run_sb_search(query)
+        or fallback_context(project, payload.intent)
+    )
     if not context:
         return 0
     print("[MEMORY] Contexto relevante antes de executar:")

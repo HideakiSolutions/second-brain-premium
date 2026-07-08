@@ -33,4 +33,5 @@ if [ "${LINT_STRICT:-0}" = "1" ] && [ "$rc" -eq 2 ]; then
 fi
 
 printf '%s' "$INPUT" | bash "$SCRIPT_DIR/sb-semantic-index-queue.sh" >/dev/null 2>&1 || true
+printf '%s' "$INPUT" | bash "$SCRIPT_DIR/sb-synapse-activate.sh" write >/dev/null 2>&1 || true
 exit 0

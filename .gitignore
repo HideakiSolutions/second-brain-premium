@@ -46,3 +46,6 @@ _memory/.events/dlq/
 _memory/.events/dedup.db
 _memory/.events/dedup.db-journal
 .claude/scheduled_tasks.lock
+
+# Camada sinaptica: estado derivado + log de ativacoes (da maquina; rebuild via `synapse build`)
+_memory/.synapse/

@@ -51,13 +51,15 @@ Da proposta, extrair 2-4 termos-chave para busca. Exemplos:
 
 ### 3. Buscar precedentes (paralelo)
 
-Para cada termo, rodar `sb-search` em múltiplos kinds:
+Para cada termo, rodar o **recall associativo** em múltiplos kinds (fonte primária - as sinapses puxam a decisão-mãe mesmo quando o hit direto é uma nota derivada):
 
 ```bash
-bash .claude/scripts/sb-search.sh "<termo 1>" --kind decisions --k 5
-bash .claude/scripts/sb-search.sh "<termo 1>" --kind learnings --k 3
-bash .claude/scripts/sb-search.sh "<termo 1>" --kind patterns --k 3
+bash .claude/scripts/sb-synapse.sh recall "<termo 1>" --kind decisions --k 5
+bash .claude/scripts/sb-synapse.sh recall "<termo 1>" --kind learnings --k 3
+bash .claude/scripts/sb-synapse.sh recall "<termo 1>" --kind patterns --k 3
 ```
+
+Aproveitar a `cadeia` de cada resultado para identificar o ADR de origem quando o hit for indireto. Fallback: se o grafo sináptico estiver ausente, usar `sb-search.sh` com os mesmos filtros.
 
 Concatenar resultados, deduplicar por arquivo, manter score máximo.
 

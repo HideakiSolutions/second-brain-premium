@@ -1,0 +1,17 @@
+{
+  "name": "secondbrain-mcp",
+  "version": "1.0.0",
+  "description": "Second Brain knowledge graph MCP server (FalkorDB + vault)",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "redis": "^4.7.0"
+  }
+}

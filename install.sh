@@ -501,7 +501,8 @@ Cole as linhas abaixo no seu crontab editando com 'crontab -e':
 ${C_DIM}# second-brain-premium scaffold
 0 7 * * *  cd "$VAULT_ROOT" && bash .claude/scripts/daily-heartbeat.sh >> .logs/daily-heartbeat.log 2>&1
 0 9 * * 1  cd "$VAULT_ROOT" && bash .claude/scripts/weekly-vault-lint.sh >> .logs/weekly-vault-lint.log 2>&1
-32 9 * * 1 cd "$VAULT_ROOT" && bash .claude/scripts/weekly-core-session.sh >> .logs/weekly-core-session.log 2>&1${C_RESET}
+32 9 * * 1 cd "$VAULT_ROOT" && bash .claude/scripts/weekly-core-session.sh >> .logs/weekly-core-session.log 2>&1
+45 9 * * 1 cd "$VAULT_ROOT" && bash .claude/scripts/weekly-synapse-consolidate.sh >> .logs/weekly-synapse-consolidate.log 2>&1${C_RESET}
 
 EOF
     info "(crontab nao foi modificado automaticamente — colar manual e seguro)"

@@ -60,11 +60,13 @@ Identifique a natureza da pergunta para escolher estratégia de busca:
 
 Se a pergunta cita projeto explícito (ex: `meu-projeto`, `meu-projeto`), adicionar `--project <slug>`.
 
-### 3. Executar busca semântica
+### 3. Executar recall associativo (fonte primária)
 
 ```bash
-bash .claude/scripts/sb-search.sh "<query reformulada>" [--kind X] [--project Y] [--k N]
+bash .claude/scripts/sb-synapse.sh recall "<query reformulada>" [--kind X] [--project Y] [--k N]
 ```
+
+O recall traz, além dos hits semânticos, o **contexto vizinho** (decisão ligada ao gotcha ligado ao projeto) com a cadeia que trouxe cada memória - use as cadeias e os "próximos saltos" para decidir o que ler. Fallback: se o grafo sináptico estiver ausente (`synapse build` nunca rodou), usar `sb-search.sh` com os mesmos filtros.
 
 Você pode rodar **múltiplas buscas paralelas** se a pergunta tem múltiplos componentes (ex: pergunta de progresso → uma busca em projects, outra em decisions pendentes).
 
@@ -99,7 +101,7 @@ Estrutura mínima:
 
 #### Pergunta sobre "quão próximo do objetivo X está?"
 Estratégia:
-1. `sb-search` no kind=projects para puxar state + roadmap
+1. recall (`sb-synapse.sh recall`) no kind=projects para puxar state + roadmap
 2. Read do `_knowledge/projects/<X>/roadmap.md` (objetivos vs entregue)
 3. Read do `_knowledge/projects/<X>/state.md` (fase atual)
 4. Cruzar: contar tarefas marcadas concluídas vs total no roadmap
@@ -107,7 +109,7 @@ Estratégia:
 
 #### Pergunta sobre "tenho dúvida X — já decidi algo similar?"
 Estratégia:
-1. `sb-search "<dúvida>" --kind decisions --k 5`
+1. `bash .claude/scripts/sb-synapse.sh recall "<dúvida>" --kind decisions --k 5`
 2. Read dos 2-3 ADRs com score >0.55
 3. Para cada ADR: classificar como **precedente** (alinhado), **contradição** (decisão atual conflita) ou **adjacente** (tema próximo, não decide)
 4. Reportar com classificação visível

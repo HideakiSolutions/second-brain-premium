@@ -414,6 +414,18 @@ Reportar no output final do `/end-session`: "Densidade: +M links, +X conceitos d
 
 Em caso de falha (auto-linker quebra), continuar — densificação é "best effort".
 
+### 8.75 Reforço sináptico da sessão (best-effort)
+
+Consolidar o sinal hebbiano da sessão: memórias co-ativadas (lidas/escritas/recuperadas juntas) fortalecem as sinapses entre si; co-ativações repetidas entre notas não-ligadas viram sinapses aprendidas (futuras sugestões de WikiLink no `/consolidate`).
+
+```bash
+bash .claude/scripts/sb-synapse.sh build
+bash .claude/scripts/sb-synapse.sh reinforce --window 480
+```
+
+Output esperado: `[synapse] reforco: N nos co-ativados, M sinapses fortalecidas, K aprendidas`.
+Reportar no output final: "Sinapses: M fortalecidas, K aprendidas". Em caso de falha, pular silenciosamente (fail-soft).
+
 ### 8.8 Sugestão preditiva para próxima sessão (opcional, best-effort)
 
 Se projeto foi identificado no Passo 1, executar o preditor ao final:

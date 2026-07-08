@@ -1,6 +1,6 @@
 # second-brain-premium
 
-> **Vault operacional para AI-SDLC com paridade Claude/Codex, busca semântica opcional (Qdrant + Ollama) e governança agêntica — derivado do [second-brain-starter](https://github.com/marciohideaki/second-brain-starter) com capacidades enterprise: 37 slash commands, 5 hooks, 3 crons, dev-squad multi-agente, pipeline editorial e biblioteca de padrões arquiteturais.**
+> **Vault operacional para AI-SDLC com paridade Claude/Codex, busca semântica opcional (Qdrant + Ollama), memória associativa sináptica (recall com reforço por uso) e governança agêntica — derivado do [second-brain-starter](https://github.com/marciohideaki/second-brain-starter) com capacidades enterprise: 39 slash commands, 5 hooks, 3 crons, dev-squad multi-agente, pipeline editorial e biblioteca de padrões arquiteturais.**
 
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-blue)](https://docs.anthropic.com/claude-code)
 [![Codex CLI](https://img.shields.io/badge/Codex-paridade%201%3A1-green)](https://github.com/openai/codex)
@@ -21,7 +21,7 @@
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação](#instalação)
 - [Primeiros 30 minutos](#primeiros-30-minutos)
-- [Os 37 slash commands](#os-37-slash-commands)
+- [Os 39 slash commands](#os-39-slash-commands)
 - [Paridade Claude ↔ Codex](#paridade-claude--codex)
 - [Stack semântico opcional (Qdrant + Ollama)](#stack-semântico-opcional-qdrant--ollama)
 - [Governança e hooks](#governança-e-hooks)
@@ -50,7 +50,7 @@ Tudo localmente, em markdown, sem cloud lock-in. O contrato agêntico vive em [`
 
 ## O que faz, em uma frase
 
-Você tem 37 comandos que cobrem o ciclo completo do AI-SDLC — desde captura de ideia até entrega validada — e tudo o que você produz fica em markdown organizado por convenções estritas, recuperável via busca semântica, e paritário entre Claude Code e Codex.
+Você tem 39 comandos que cobrem o ciclo completo do AI-SDLC — desde captura de ideia até entrega validada — e tudo o que você produz fica em markdown organizado por convenções estritas, recuperável via busca semântica, e paritário entre Claude Code e Codex.
 
 ---
 
@@ -69,7 +69,7 @@ Você tem 37 comandos que cobrem o ciclo completo do AI-SDLC — desde captura d
 4. **Python 3.11+** — necessário para subsistemas `curator/`, `predictor/`, `style/profiler.py` e para o hook `secret-guard`.
 5. **Docker** *ou* binários nativos — para o stack semântico (Qdrant + Ollama). O `stack.sh` suporta os dois modos; sem o stack, todos os comandos que dependem dele degradam para fallback determinístico (grep + Read).
 6. **`gh` CLI** — se quiser usar comandos que tocam GitHub (PRs, issues).
-7. **crontab** — Linux/macOS/WSL. Para os 3 crons opcionais (daily-heartbeat, weekly-vault-lint, weekly-core-session).
+7. **crontab** — Linux/macOS/WSL. Para os 4 crons opcionais (daily-heartbeat, weekly-vault-lint, weekly-core-session, weekly-synapse-consolidate).
 
 ### Plataformas
 
@@ -181,7 +181,7 @@ Atualiza `_memory/current-state.md`, registra entrada em `_memory/activity-log.m
 
 ---
 
-## Os 37 slash commands
+## Os 39 slash commands
 
 Cada comando tem versão Claude (`.claude/commands/<nome>.md`) e Codex (`.codex/skills/sb-<nome>/SKILL.md`). Agrupados por etapa do AI-SDLC.
 
@@ -207,6 +207,8 @@ Cada comando tem versão Claude (`.claude/commands/<nome>.md`) e Codex (`.codex/
 | `/ask <pergunta>` | Resposta sintetizada via busca semântica + leitura de fontes, sempre com referências verificáveis | Pergunta sobre conteúdo do vault | **+** Recall semântico; **−** Requer stack ativo para qualidade plena (fallback grep) |
 | `/search <query>` | Top-K resultados via Qdrant + filtros (kind, project, k) | Procurar referência específica | **+** <100ms; **−** Sem stack, vira grep |
 | `/reindex` | Reindex incremental ou completo do Qdrant | Após mudanças grandes no vault | **+** Mantém index fresco; **−** Requer stack ativo |
+| `/recall <query>` | **Recall associativo**: sementes semânticas + propagação pelas sinapses (links tipados com peso) + força de uso; cada resultado explica a cadeia de memórias | Quando o contexto AO REDOR dos hits importa (decisão → gotcha → projeto) | **+** Memória puxa memória, explicável; **−** Modo query requer stack (modo `--seed` é offline) |
+| `/consolidate` | Ciclo de "sono" da memória: compacta current-state, expira capturas, propõe merges/links aprendidos, reconcilia grafo FalkorDB | Semanal (cron) ou quando a memória de trabalho crescer | **+** Estanca memory rot sem apagar nada; **−** Propostas exigem curadoria humana |
 
 ### ⚖️ Decisão e justificação
 
@@ -488,7 +490,7 @@ _cores/                            <- core repos compartilhados (vazio no scaffo
 _infrastructure/                   <- estado operacional (vazio no scaffold)
 
 .claude/
-  commands/                        <- 37 slash commands
+  commands/                        <- 39 slash commands
   scripts/                         <- 30 scripts (hooks, lint, lib)
   skills/                          <- 5 skills nativas (beacon, dev-squad, etc.)
   settings.json                    <- hooks Claude Code
@@ -610,7 +612,7 @@ A premium, enterprise-grade second-brain scaffold derived from the open-source [
 
 ### What's different vs starter
 
-- **37 slash commands** (vs starter's 12) covering capture → ingest → decide → execute → validate → deliver → close
+- **39 slash commands** (vs starter's 12) covering capture → ingest → decide → execute → validate → deliver → close
 - **1:1 Claude ↔ Codex parity** (37 ports in `.codex/skills/sb-*/`)
 - **Optional local semantic stack** (Qdrant + Ollama) for `/ask`, `/search`, `/justify`, `/densify`
 - **Dev-squad** for parallel multi-agent execution (Opus planning + Sonnet/Haiku workers in isolated worktrees)
