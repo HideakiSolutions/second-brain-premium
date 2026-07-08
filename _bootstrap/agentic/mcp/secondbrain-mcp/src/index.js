@@ -23,10 +23,10 @@ import { join, resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { z } from "zod";
 
-// Raiz do vault: env SECONDBRAIN_VAULT ou derivada da posicao deste script
+// Raiz do vault: env SB_VAULT_ROOT (canonica) ou derivada da posicao deste script
 // (_bootstrap/agentic/mcp/secondbrain-mcp/src -> 5 niveis acima).
 const __dirname_ = dirname(fileURLToPath(import.meta.url));
-const VAULT = process.env.SECONDBRAIN_VAULT || resolve(__dirname_, "..", "..", "..", "..", "..");
+const VAULT = process.env.SB_VAULT_ROOT || resolve(__dirname_, "..", "..", "..", "..", "..");
 const FALKOR_HOST = "127.0.0.1";
 const FALKOR_PORT = 6379;
 const GRAPH = "secondbrain";

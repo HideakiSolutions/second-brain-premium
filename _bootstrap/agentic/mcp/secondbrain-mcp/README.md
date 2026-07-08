@@ -2,7 +2,7 @@
 
 MCP server que expõe o second brain (recall associativo + grafo FalkorDB) como tools para qualquer sessão Claude Code, em qualquer projeto.
 
-A raiz do vault é resolvida automaticamente pela posição deste pacote; para vaults fora do padrão, defina `SECONDBRAIN_VAULT=/caminho/do/vault`.
+A raiz do vault é resolvida automaticamente pela posição deste pacote; para vaults fora do padrão, defina `SB_VAULT_ROOT=/caminho/do/vault`.
 
 ## Pré-requisitos
 
