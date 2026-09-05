@@ -1,0 +1,7 @@
+schema_version: repository-contract/v1
+repository_id: 10c0c2a5-b43b-4c89-b00e-c087608b0859
+identity:
+  remotes:
+  - github.com/hideakisolutions/second-brain-premium
+capabilities:
+  manifest: null
