@@ -10,17 +10,18 @@
 #   ./install.sh --yes            # nao-interativo, usa defaults
 #   ./install.sh --dry-run        # nao executa nada, so mostra o plano
 #   ./install.sh --uninstall      # reverte instalacao
-#   ./install.sh --minimal        # so commands; sem hooks, skills Codex, CLAUDE.md
+#   ./install.sh --minimal        # so commands e skills Claude; sem hooks, skills Codex, CLAUDE.md
 #   ./install.sh --debug          # log verboso
 #   ./install.sh --help           # esta mensagem
 #
 # Componentes que o installer pode integrar:
 #   1. Slash commands  -> ~/.claude/commands/  (Claude Code)
-#   2. Skills Codex     -> ~/.codex/skills/    (Codex CLI)
-#   3. Hooks            -> ~/.claude/settings.json (merge idempotente)
-#   4. CLAUDE.md global -> ~/.claude/CLAUDE.md (append seção Second Brain)
-#   5. Crons            -> linhas para colar manualmente no crontab
-#   6. Stack semantico  -> Qdrant + Ollama em modo docker ou nativo (opcional)
+#   2. Skills Claude   -> ~/.claude/skills/    (Claude Code, formato Agent Skills)
+#   3. Skills Codex     -> ~/.codex/skills/    (Codex CLI)
+#   4. Hooks            -> ~/.claude/settings.json (merge idempotente)
+#   5. CLAUDE.md global -> ~/.claude/CLAUDE.md (append seção Second Brain)
+#   6. Crons            -> linhas para colar manualmente no crontab
+#   7. Stack semantico  -> Qdrant + Ollama em modo docker ou nativo (opcional)
 #
 # Cada componente e opt-in: usuario aprova individualmente.
 
@@ -154,7 +155,7 @@ link_or_copy() {
   if ln -sf "$src" "$dst" 2>/dev/null; then
     debug "symlink: $dst -> $src"
   else
-    cp -f "$src" "$dst" 2>/dev/null && debug "copy: $src -> $dst" || {
+    cp -rf "$src" "$dst" 2>/dev/null && debug "copy: $src -> $dst" || {
       err "falha ao linkar/copiar $src para $dst"
       return 1
     }
@@ -242,6 +243,7 @@ if [ "$UNINSTALL" -eq 1 ]; then
   confirm "Continuar?" N || { info "cancelado pelo usuario"; exit 0; }
 
   CLAUDE_CMDS_DIR=$(ask_path "Diretorio dos commands Claude" "$HOME/.claude/commands")
+  CLAUDE_SKILLS_DIR=$(ask_path "Diretorio das skills Claude" "$HOME/.claude/skills")
   CODEX_SKILLS_DIR=$(ask_path "Diretorio das skills Codex" "$HOME/.codex/skills")
 
   # Remove symlinks que apontam para nosso VAULT_ROOT
@@ -252,6 +254,17 @@ if [ "$UNINSTALL" -eq 1 ]; then
       "$VAULT_ROOT"/*)
         [ "$DRY_RUN" -eq 1 ] && info "(dry-run) rm $f" || rm -f "$f"
         inc "commands_removed"
+        ;;
+    esac
+  done
+
+  for d in "$CLAUDE_SKILLS_DIR"/*; do
+    [ -L "$d" ] || continue
+    target=$(readlink "$d" 2>/dev/null || true)
+    case "$target" in
+      "$VAULT_ROOT"/*)
+        [ "$DRY_RUN" -eq 1 ] && info "(dry-run) rm $d" || rm -rf "$d"
+        inc "claude_skills_removed"
         ;;
     esac
   done
@@ -268,8 +281,9 @@ if [ "$UNINSTALL" -eq 1 ]; then
   done
 
   ok "uninstall concluido"
-  log "  commands removidos: ${SUMMARY[commands_removed]:-0}"
-  log "  skills removidas:   ${SUMMARY[skills_removed]:-0}"
+  log "  commands removidos:    ${SUMMARY[commands_removed]:-0}"
+  log "  skills Claude removidas: ${SUMMARY[claude_skills_removed]:-0}"
+  log "  skills Codex removidas:  ${SUMMARY[skills_removed]:-0}"
   log ""
   log "Para limpeza completa, edite manualmente:"
   log "  - $HOME/.claude/settings.json  (remova entradas hook apontando para $VAULT_ROOT)"
@@ -291,6 +305,7 @@ CODEX_HOME_DEFAULT="${CODEX_HOME:-$HOME/.codex}"
 
 CLAUDE_HOME=$(ask_path "Diretorio config Claude Code" "$CLAUDE_HOME_DEFAULT")
 CLAUDE_CMDS_DIR="$CLAUDE_HOME/commands"
+CLAUDE_SKILLS_DIR="$CLAUDE_HOME/skills"
 CLAUDE_SETTINGS="$CLAUDE_HOME/settings.json"
 CLAUDE_MD_GLOBAL="$CLAUDE_HOME/CLAUDE.md"
 
@@ -302,6 +317,7 @@ else
 fi
 
 info "Claude commands:  $CLAUDE_CMDS_DIR"
+info "Claude skills:    $CLAUDE_SKILLS_DIR"
 info "Claude settings:  $CLAUDE_SETTINGS"
 info "Claude CLAUDE.md: $CLAUDE_MD_GLOBAL"
 [ -n "$CODEX_SKILLS_DIR" ] && info "Codex skills:     $CODEX_SKILLS_DIR" || warn "Codex: SKIP"
@@ -332,11 +348,37 @@ else
 fi
 
 # ============================================================================
-# 2. Skills Codex
+# 2. Skills Claude Code (nativas, formato Agent Skills)
+# ============================================================================
+
+title "2. Skills Claude Code (.claude/skills)"
+
+if [ -d "$VAULT_ROOT/.claude/skills" ] && confirm "Instalar skills Claude Code em $CLAUDE_SKILLS_DIR?" Y; then
+  if [ "$DRY_RUN" -eq 0 ]; then
+    mkdir -p "$CLAUDE_SKILLS_DIR"
+  else
+    info "(dry-run) mkdir -p $CLAUDE_SKILLS_DIR"
+  fi
+
+  count=0
+  for skill_dir in "$VAULT_ROOT"/.claude/skills/*; do
+    [ -d "$skill_dir" ] || continue
+    [ -f "$skill_dir/SKILL.md" ] || continue
+    dst="$CLAUDE_SKILLS_DIR/$(basename "$skill_dir")"
+    link_or_copy "$skill_dir" "$dst" && count=$((count + 1))
+  done
+  ok "$count skills Claude Code instaladas"
+  SUMMARY[claude_skills]=$count
+else
+  warn "skills Claude Code: SKIP"
+fi
+
+# ============================================================================
+# 3. Skills Codex
 # ============================================================================
 
 if [ "$MINIMAL" -eq 0 ] && [ -n "$CODEX_SKILLS_DIR" ]; then
-  title "2. Skills Codex (~37 ports paritarias)"
+  title "3. Skills Codex (~37 ports paritarias)"
 
   if confirm "Instalar skills Codex em $CODEX_SKILLS_DIR?" Y; then
     if [ "$DRY_RUN" -eq 0 ]; then
@@ -361,11 +403,11 @@ else
 fi
 
 # ============================================================================
-# 3. Hooks em settings.json
+# 4. Hooks em settings.json
 # ============================================================================
 
 if [ "$MINIMAL" -eq 0 ]; then
-  title "3. Hooks Claude Code (settings.json)"
+  title "4. Hooks Claude Code (settings.json)"
 
   if confirm "Configurar hooks em $CLAUDE_SETTINGS?" Y; then
     backup_file "$CLAUDE_SETTINGS"
@@ -426,11 +468,11 @@ else
 fi
 
 # ============================================================================
-# 4. CLAUDE.md global
+# 5. CLAUDE.md global
 # ============================================================================
 
 if [ "$MINIMAL" -eq 0 ]; then
-  title "4. Pointer global em CLAUDE.md"
+  title "5. Pointer global em CLAUDE.md"
 
   if confirm "Adicionar bloco 'Second Brain' em $CLAUDE_MD_GLOBAL?" Y; then
     SB_BLOCK_MARKER_BEGIN="<!-- BEGIN second-brain-premium scaffold -->"
@@ -487,11 +529,11 @@ else
 fi
 
 # ============================================================================
-# 5. Crons (instrucoes manuais — nao modifica crontab)
+# 6. Crons (instrucoes manuais — nao modifica crontab)
 # ============================================================================
 
 if [ "$MINIMAL" -eq 0 ]; then
-  title "5. Crons opcionais"
+  title "6. Crons opcionais"
 
   if confirm "Mostrar linhas para colar no crontab?" Y; then
     cat <<EOF
@@ -513,11 +555,11 @@ EOF
 fi
 
 # ============================================================================
-# 6. Stack semantico (escolha de modo: docker | native | nenhum)
+# 7. Stack semantico (escolha de modo: docker | native | nenhum)
 # ============================================================================
 
 if [ "$MINIMAL" -eq 0 ]; then
-  title "6. Stack semantico opcional (Qdrant + Ollama)"
+  title "7. Stack semantico opcional (Qdrant + Ollama)"
 
   # Auto-deteccao para defaults
   HAS_DOCKER=0; command -v docker >/dev/null 2>&1 && HAS_DOCKER=1
@@ -607,6 +649,7 @@ title "Resumo"
 log "Componente            Status"
 log "-------------------  --------"
 log "Commands Claude      $([ -n "${SUMMARY[commands]:-}" ] && echo "${SUMMARY[commands]} instalados" || echo "skip")"
+log "Skills Claude        $([ -n "${SUMMARY[claude_skills]:-}" ] && echo "${SUMMARY[claude_skills]} instaladas" || echo "skip")"
 log "Skills Codex         $([ -n "${SUMMARY[skills]:-}" ] && echo "${SUMMARY[skills]} instaladas" || echo "skip")"
 log "Hooks settings.json  $([ -n "${SUMMARY[hooks]:-}" ] && echo "configurado" || echo "skip")"
 log "CLAUDE.md global     $([ -n "${SUMMARY[claude_md]:-}" ] && echo "atualizado" || echo "skip")"
